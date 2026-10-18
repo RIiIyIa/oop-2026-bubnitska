@@ -1,6 +1,6 @@
 namespace ShopApp.Models;
 
-public class FoodProduct : Product
+public class FoodProduct : Product, ISellable
 {
     public DateTime ExpirationDate { get; set; } // Термін придатності
 
@@ -9,8 +9,13 @@ public class FoodProduct : Product
         return BasePrice; // Продукти без додаткового податку
     }
 
+    public string GetProductInfo()
+    {
+        return $"[Продукти] {Name}, Ціна: {CalculatePrice():F2} грн., Придатний до: {ExpirationDate.ToShortDateString()}";
+    }
+
     public override void DisplayInfo()
     {
-        Console.WriteLine($"[Продукти] Назва: {Name}, Ціна: {CalculatePrice():F2} грн., Придатний до: {ExpirationDate.ToShortDateString()}");
+        Console.WriteLine(GetProductInfo());
     }
 }
