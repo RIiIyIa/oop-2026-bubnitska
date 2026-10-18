@@ -1,34 +1,41 @@
 using ShopApp.Models;
 
 // 1. Демонстрація роботи з покупцем
-Customer customer = new Customer();
-customer.Name = "Олександр Шевченко";
-Console.WriteLine($"Покупець: {customer.Name}");
+Customer customer = new Customer
+{
+    Name = "Олександр Шевченко"
+};
+Console.WriteLine($"Покупець: {customer.Name}\n");
 
-Console.WriteLine("\nСпроба встановити некоректне ім'я покупця:");
-customer.Name = ""; // Має вивести помилку
+// 2. Створення поліморфної колекції товарів різних категорій
+List<Product> products = new List<Product>
+{
+    new ElectronicsProduct
+    {
+        Name = "Смартфон",
+        Category = "Електроніка",
+        BasePrice = 19999.99m,
+        WarrantyMonths = 12
+    },
+    new FoodProduct
+    {
+        Name = "Кава зернова",
+        Category = "Продукти",
+        BasePrice = 350.00m,
+        ExpirationDate = new DateTime(2027, 10, 15)
+    },
+    new ClothingProduct
+    {
+        Name = "Куртка зимова",
+        Category = "Одяг",
+        BasePrice = 2800.00m,
+        Size = "L"
+    }
+};
 
-// 2. Демонстрація роботи з товаром та валідацією
-Product product = new Product();
-product.Name = "Смартфон";
-product.Category = "Електроніка";
-product.Price = 19999.99m;
-
-Console.WriteLine($"\nТовар: {product.Name}, Категорія: {product.Category}, Ціна: {product.Price} грн.");
-
-Console.WriteLine("\nСпроба встановити некоректну ціну:");
-product.Price = -500; // Має вивести помилку
-
-// 3. Демонстрація керування станом товару (додавання та списання)
-Console.WriteLine("\n--- Керування кількістю товару ---");
-product.AddProduct(10); // Додаємо 10 шт.
-
-Console.WriteLine($"Поточний залишок: {product.Quantity}");
-
-product.RemoveProduct(3); // Списуємо 3 шт.
-
-Console.WriteLine("\nСпроба списати більше товару, ніж є в наявності:");
-product.RemoveProduct(15); // Заборонено списання
-
-// Пряма зміна кількості заборонена компілятором:
-// product.Quantity = 50; // Помилка компіляції: Property or indexer 'Product.Quantity' cannot be assigned to -- it is read only
+// 3. Поліморфний виклик методів через посилання на базовий клас Product
+Console.WriteLine("Каталог товарів інтернет-магазину (поліморфний вивід):");
+foreach (Product product in products)
+{
+    product.DisplayInfo();
+}

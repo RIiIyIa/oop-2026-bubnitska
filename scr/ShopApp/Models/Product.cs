@@ -1,15 +1,15 @@
 namespace ShopApp.Models;
 
-public class Product
+public abstract class Product
 {
-    private string name = string.Empty;
-    private string category = string.Empty;
-    private decimal price;
-    private int quantity;
+    private string _name = string.Empty;
+    private string _category = string.Empty;
+    private decimal _basePrice;
+    private int _quantity;
 
     public string Name
     {
-        get => name;
+        get => _name;
         set
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -17,13 +17,13 @@ public class Product
                 Console.WriteLine("Помилка: Назва товару не може бути порожньою!");
                 return;
             }
-            name = value;
+            _name = value;
         }
     }
 
     public string Category
     {
-        get => category;
+        get => _category;
         set
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -31,59 +31,41 @@ public class Product
                 Console.WriteLine("Помилка: Категорія товару не може бути порожньою!");
                 return;
             }
-            category = value;
+            _category = value;
         }
     }
 
-    public decimal Price
+    public decimal BasePrice
     {
-        get => price;
+        get => _basePrice;
         set
         {
             if (value < 0)
             {
-                Console.WriteLine("Помилка: Ціна не може бути від'ємною!");
+                Console.WriteLine("Помилка: Ціна товару не може бути від'ємною!");
                 return;
             }
-            price = value;
+            _basePrice = value;
         }
     }
 
-    // Властивість Quantity має приватний setter для захисту від прямої зміни стану
-    public int Quantity
-    {
-        get => quantity;
-        private set => quantity = value;
-    }
+    public int Quantity => _quantity;
 
-    // Метод додавання товару
     public void AddProduct(int amount)
     {
-        if (amount <= 0)
-        {
-            Console.WriteLine("Помилка: Кількість для додавання має бути більшою за 0!");
-            return;
-        }
-        Quantity += amount;
-        Console.WriteLine($"Успішно додано {amount} шт. Поточна кількість: {Quantity}");
+        if (amount > 0) _quantity += amount;
     }
 
-    // Метод списання товару із забороною списання за недостатньої кількості
     public void RemoveProduct(int amount)
     {
-        if (amount <= 0)
-        {
-            Console.WriteLine("Помилка: Кількість для списання має бути більшою за 0!");
-            return;
-        }
+        if (amount > 0 && amount <= _quantity) _quantity -= amount;
+    }
 
-        if (amount > Quantity)
-        {
-            Console.WriteLine($"Помилка: Недостатньо товару '{Name}' на складі для списання {amount} шт. Доступно: {Quantity}");
-            return;
-        }
+    // Віртуальний або абстрактний метод для поліморфізму
+    public abstract decimal CalculatePrice();
 
-        Quantity -= amount;
-        Console.WriteLine($"Успішно списано {amount} шт. Залишок: {Quantity}");
+    public virtual void DisplayInfo()
+    {
+        Console.WriteLine($"Товар: {_name}, Категорія: {_category}, Базова ціна: {_basePrice} грн., Кількість: {_quantity} шт.");
     }
 }
