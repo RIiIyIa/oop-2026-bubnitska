@@ -1,50 +1,32 @@
 using ShopApp.Models;
 
-// 1. Створення покупця
-Customer customer = new Customer
-{
-    Name = "Олександр Шевченко"
-};
+// 1. Створення каталогу для електроніки за допомогою узагальненого класу Catalog<T>
+Catalog<ElectronicsProduct> electronicsCatalog = new Catalog<ElectronicsProduct>();
 
-// 2. Створення товарів
-ElectronicsProduct phone = new ElectronicsProduct
+electronicsCatalog.Add(new ElectronicsProduct
 {
     Name = "Смартфон",
     Category = "Електроніка",
     BasePrice = 19999.99m,
     WarrantyMonths = 12
-};
+});
 
-FoodProduct coffee = new FoodProduct
+electronicsCatalog.Add(new ElectronicsProduct
 {
-    Name = "Кава зернова",
-    Category = "Продукти",
-    BasePrice = 350.00m,
-    ExpirationDate = new DateTime(2027, 10, 15)
-};
+    Name = "Планшет",
+    Category = "Електроніка",
+    BasePrice = 12500.00m,
+    WarrantyMonths = 24
+});
 
-ClothingProduct jacket = new ClothingProduct
-{
-    Name = "Куртка зимова",
-    Category = "Одяг",
-    BasePrice = 2800.00m,
-    Size = "L"
-};
+Console.WriteLine($"Кількість товарів у каталозі електроніки: {electronicsCatalog.Count}\n");
 
-// 3. Композиція: створення замовлення та додавання товарів
-Order order = new Order(customer);
-order.AddItem(phone);
-order.AddItem(coffee);
-order.AddItem(jacket);
+// 2. Використання узагальненого методу пошуку Find<T>
+List<ElectronicsProduct> expensiveProducts = ShopHelper.Find(
+    electronicsCatalog.GetAll(),
+    p => p.BasePrice > 15000m
+);
 
-// Виведення інформації про замовлення
-order.DisplayOrderDetails();
-
-// 4. Поліморфна робота через інтерфейс ISellable (окремий список товари до продажу)
-List<ISellable> sellableItems = new List<ISellable> { phone, coffee, jacket };
-
-Console.WriteLine("Поліморфний розрахунок вартості товарів через інтерфейс ISellable:");
-foreach (ISellable item in sellableItems)
-{
-    Console.WriteLine($"Товар: {item.GetProductInfo()} | Розрахована вартість: {item.CalculatePrice():F2} грн.");
-}
+// 3. Використання узагальненого методу з обмеженням типу DisplayProductNames<T>
+Console.WriteLine("Товари вартістю понад 15000 грн:");
+ShopHelper.DisplayProductNames(expensiveProducts);
