@@ -1,6 +1,6 @@
 namespace ShopApp.Models;
 
-public class ElectronicsProduct : Product
+public class ElectronicsProduct : Product, ISellable
 {
     public int WarrantyMonths { get; set; } // Гарантія в місяцях
 
@@ -10,8 +10,13 @@ public class ElectronicsProduct : Product
         return BasePrice * 1.05m; // +5% податок
     }
 
+    public string GetProductInfo()
+    {
+        return $"[Електроніка] {Name}, Ціна: {CalculatePrice():F2} грн., Гарантія: {WarrantyMonths} міс.";
+    }
+
     public override void DisplayInfo()
     {
-        Console.WriteLine($"[Електроніка] Назва: {Name}, Ціна з податком: {CalculatePrice():F2} грн., Гарантія: {WarrantyMonths} міс.");
+        Console.WriteLine(GetProductInfo());
     }
 }
