@@ -1,32 +1,52 @@
 using ShopApp.Models;
 
-// 1. Створення каталогу для електроніки за допомогою узагальненого класу Catalog<T>
-Catalog<ElectronicsProduct> electronicsCatalog = new Catalog<ElectronicsProduct>();
+ShopManager shop = new ShopManager();
 
-electronicsCatalog.Add(new ElectronicsProduct
+// 1. Заповнення каталогу (Dictionary<int, Product>)
+shop.AddToCatalog(new ElectronicsProduct
 {
+    Id = 1,
     Name = "Смартфон",
     Category = "Електроніка",
     BasePrice = 19999.99m,
     WarrantyMonths = 12
 });
 
-electronicsCatalog.Add(new ElectronicsProduct
+shop.AddToCatalog(new ElectronicsProduct
 {
-    Name = "Планшет",
+    Id = 2,
+    Name = "Ноутбук",
     Category = "Електроніка",
-    BasePrice = 12500.00m,
+    BasePrice = 34500.00m,
     WarrantyMonths = 24
 });
 
-Console.WriteLine($"Кількість товарів у каталозі електроніки: {electronicsCatalog.Count}\n");
+shop.AddToCatalog(new FoodProduct
+{
+    Id = 3,
+    Name = "Кава зернова",
+    Category = "Продукти",
+    BasePrice = 350.00m,
+    ExpirationDate = new DateTime(2027, 10, 15)
+});
 
-// 2. Використання узагальненого методу пошуку Find<T>
-List<ElectronicsProduct> expensiveProducts = ShopHelper.Find(
-    electronicsCatalog.GetAll(),
-    p => p.BasePrice > 15000m
-);
+// 2. Пошук товару за ID у Dictionary
+Console.WriteLine("--- Пошук товару за ID (Dictionary) ---");
+var foundProduct = shop.GetProductById(1);
+foundProduct?.DisplayInfo();
 
-// 3. Використання узагальненого методу з обмеженням типу DisplayProductNames<T>
-Console.WriteLine("Товари вартістю понад 15000 грн:");
-ShopHelper.DisplayProductNames(expensiveProducts);
+// 3. Формування кошика (List<Product>)
+Console.WriteLine("\n--- Формування кошика (List) ---");
+if (foundProduct != null) shop.AddToCart(foundProduct);
+
+foreach (var item in shop.GetCartItems())
+{
+    Console.WriteLine($"У кошику: {item.Name} - {item.CalculatePrice():F2} грн.");
+}
+
+// 4. Отримання товарів категорії 'Електроніка' за допомогою yield return
+Console.WriteLine("\n--- Товари категорії 'Електроніка' (yield return) ---");
+foreach (Product item in shop.GetProductsByCategory("Електроніка"))
+{
+    item.DisplayInfo();
+}
