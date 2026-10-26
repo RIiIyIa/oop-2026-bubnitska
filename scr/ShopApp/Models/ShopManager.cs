@@ -2,13 +2,9 @@ namespace ShopApp.Models;
 
 public class ShopManager
 {
-    // Dictionary<int, Product> для швидкодійного доступу за ID
     private readonly Dictionary<int, Product> _catalog = new();
-    
-    // List<Product> для зберігання товарів у кошику
     private readonly List<Product> _cart = new();
 
-    // 1. Додавання товару до каталогу
     public void AddToCatalog(Product product)
     {
         if (!_catalog.ContainsKey(product.Id))
@@ -17,36 +13,45 @@ public class ShopManager
         }
     }
 
-    // Видалення товару з каталогу за ID
-    public bool RemoveFromCatalog(int id)
+    public IReadOnlyCollection<Product> GetAllProducts() => _catalog.Values.ToList();
+
+    // 1. Фільтрація та сортування товарів за ціною і категорією
+    public IEnumerable<Product> FilterAndSortProducts(string category, decimal maxPrice)
     {
-        return _catalog.Remove(id);
+        // Демонстрація відкладеного виконання (deferred execution)
+        return _catalog.Values
+            .Where(p => p.Category.Equals(category, StringComparison.OrdinalIgnoreCase) && p.BasePrice <= maxPrice)
+            .OrderBy(p => p.BasePrice)
+            .ThenBy(p => p.Name);
     }
 
-    // Пошук товару за ID
-    public Product? GetProductById(int id)
+    // 2. Проєктування даних через Select (анонімні типи або спеціальні проєкції)
+    public IEnumerable<object> GetProductProjections()
     {
-        _catalog.TryGetValue(id, out var product);
-        return product;
-    }
-
-    // 2. Додавання товару до кошика
-    public void AddToCart(Product product)
-    {
-        _cart.Add(product);
-    }
-
-    public IReadOnlyList<Product> GetCartItems() => _cart.AsReadOnly();
-
-    // 3. Ітератор з yield return для отримання товарів обраної категорії
-    public IEnumerable<Product> GetProductsByCategory(string category)
-    {
-        foreach (var product in _catalog.Values)
+        return _catalog.Values.Select(p => new
         {
-            if (product.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
+            Title = p.Name,
+            Price = p.CalculatePrice(),
+            CategoryName = p.Category
+        });
+    }
+
+    // 3. Групування та агрегування (групування за категоріями)
+    public void DisplayCategorySummary()
+    {
+        var summary = _catalog.Values
+            .GroupBy(p => p.Category)
+            .Select(g => new
             {
-                yield return product; // лінива ітерація без створення проміжного списку
-            }
+                Category = g.Key,
+                Count = g.Count(),
+                AveragePrice = g.Average(p => p.CalculatePrice())
+            });
+
+        Console.WriteLine("\n--- Групування та агрегування за категоріями ---");
+        foreach (var group in summary)
+        {
+            Console.WriteLine($"Категорія: {group.Category} | Кількість товарів: {group.Count} | Середня ціна: {group.AveragePrice:F2} грн.");
         }
     }
 }
