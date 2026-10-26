@@ -2,6 +2,7 @@ namespace ShopApp.Models;
 
 public abstract class Product
 {
+    public int Id { get; set; }
     private string _name = string.Empty;
     private string _category = string.Empty;
     private decimal _basePrice;
@@ -61,11 +62,10 @@ public abstract class Product
         if (amount > 0 && amount <= _quantity) _quantity -= amount;
     }
 
-    // Віртуальний або абстрактний метод для поліморфізму
     public abstract decimal CalculatePrice();
 
     public virtual void DisplayInfo()
     {
-        Console.WriteLine($"Товар: {_name}, Категорія: {_category}, Базова ціна: {_basePrice} грн., Кількість: {_quantity} шт.");
+        Console.WriteLine($"[ID: {Id}] Товар: {_name}, Категорія: {_category}, Базова ціна: {_basePrice} грн., Кількість: {_quantity} шт.");
     }
 }
