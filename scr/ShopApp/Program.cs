@@ -1,24 +1,46 @@
 using ShopApp.Models;
 
-// 1. Створення об'єкта record Snapshot
-ProductSnapshot phone = new ProductSnapshot(
-    Id: 1,
-    Name: "Смартфон",
-    BasePrice: 19999.99m,
-    Category: "Електроніка",
-    Description: "Флагманський смартфон із потужним процесором"
-);
+ElectronicsProduct phone = new ElectronicsProduct
+{
+    Id = 1,
+    Name = "Смартфон",
+    Category = "Електроніка",
+    BasePrice = 19999.99m,
+    WarrantyMonths = 12
+};
 
-PriceValue priceStruct = new PriceValue(19999.99m);
+phone.AddProduct(5); // Додаємо 5 шт. на склад
 
-Console.WriteLine($"Товар: {phone.Name} | Ціна (struct): {priceStruct.Value} грн.");
-Console.WriteLine($"Цінова категорія: {ProductDataProcessor.GetPriceCategory(phone)}");
-Console.WriteLine($"Опис: {ProductDataProcessor.GetDescriptionText(phone)}");
+bool isProcessing = true;
 
-// 2. Демонстрація роботи з діапазонами для SKU
-string sampleSku = "ELK-98765";
-Console.WriteLine($"Префікс SKU ({sampleSku}): {ProductDataProcessor.GetSkuPrefix(sampleSku)}");
+// Сценарій 1: Спроба списати більшу кількість, ніж є на складі (викликає InsufficientStockException)
+try
+{
+    Console.WriteLine("Спроба списати 10 шт. смартфона...");
+    phone.RemoveProduct(10);
+}
+catch (InsufficientStockException ex)
+{
+    Console.WriteLine($"[Помилка складу]: {ex.Message}");
+}
+catch (ArgumentOutOfRangeException ex)
+{
+    Console.WriteLine($"[Помилка аргументу]: {ex.Message}");
+}
+finally
+{
+   isProcessing = false;
+    Console.WriteLine($"Стан обробки (isProcessing): {isProcessing}");
+    Console.WriteLine($"Операція завершена. Поточний залишок не змінився і становить: {phone.Quantity} шт.\n");
+}
 
-// 3. Демонстрація незмінності та виразу with (створення копії зі зміненою ціною)
-var discountedPhone = ProductDataProcessor.WithNewPrice(phone, 17999.99m);
-Console.WriteLine($"Знижка! Нова ціна смартфона: {discountedPhone.BasePrice} грн.");
+// Сценарій 2: Перевірка валідації вхідних даних (ArgumentOutOfRangeException)
+try
+{
+    Console.WriteLine("Спроба встановити ціну...");
+    phone.BasePrice = -500m;
+}
+catch (ArgumentOutOfRangeException ex)
+{
+    Console.WriteLine($"[Перехоплено виняток валідації]: {ex.ParamName} -> {ex.Message}");
+}
