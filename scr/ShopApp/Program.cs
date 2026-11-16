@@ -1,31 +1,50 @@
 using ShopApp.Models;
 
-ShopManager shop = new ShopManager();
-
-// Заповнення каталогу товарами
-shop.AddToCatalog(new ElectronicsProduct { Id = 1, Name = "Смартфон", Category = "Електроніка", BasePrice = 19999.99m, WarrantyMonths = 12 });
-shop.AddToCatalog(new ElectronicsProduct { Id = 2, Name = "Навушники", Category = "Електроніка", BasePrice = 2500.00m, WarrantyMonths = 6 });
-shop.AddToCatalog(new FoodProduct { Id = 3, Name = "Кава зернова", Category = "Продукти", BasePrice = 350.00m, ExpirationDate = new DateTime(2027, 10, 15) });
-shop.AddToCatalog(new FoodProduct { Id = 4, Name = "Шоколад", Category = "Продукти", BasePrice = 90.00m, ExpirationDate = new DateTime(2026, 12, 1) });
-
-// 1. Фільтрація та сортування
-Console.WriteLine("--- Фільтрація та сортування (Електроніка дешевша за 25000 грн) ---");
-var filteredProducts = shop.FilterAndSortProducts("Електроніка", 25000m);
-
-// Демонстрація матеріалізації запиту за допомогою ToList() (негайне виконання)
-var materializedList = filteredProducts.ToList(); 
-
-foreach (var product in materializedList)
+// 1. Створення товарів
+ElectronicsProduct phone = new ElectronicsProduct
 {
-    product.DisplayInfo();
+    Id = 1,
+    Name = "Смартфон",
+    Category = "Електроніка",
+    BasePrice = 19999.99m,
+    WarrantyMonths = 12
+};
+
+FoodProduct coffee = new FoodProduct
+{
+    Id = 2,
+    Name = "Кава зернова",
+    Category = "Продукти",
+    BasePrice = 350.00m,
+    ExpirationDate = new DateTime(2027, 10, 15)
+};
+
+// 2. Налаштування підписки на подію StockChanged
+ShopNotifier notifier = new ShopNotifier();
+ShopNotifier.Subscribe(phone, notifier);
+
+phone.UpdateQuantity(10); // Звичайне поповнення
+
+// Викличе попередження про низький залишок (< 3)
+phone.UpdateQuantity(2); 
+
+// 3. Використання Predicate<Product> для фільтрації товарів
+Console.WriteLine("\n--- Добір товарів за допомогою Predicate<T> ---");
+Predicate<Product> affordableProducts = p => p.BasePrice < 1000m;
+var cheapItems = ShopNotifier.FilterProducts(new List<Product> { phone, coffee }, affordableProducts);
+
+foreach (var item in cheapItems)
+{
+    item.DisplayInfo();
 }
 
-// 2. Проєктування даних (Select)
-Console.WriteLine("\n--- Проєктування даних (Select) ---");
-foreach (var item in shop.GetProductProjections())
-{
-    Console.WriteLine(item);
-}
+// 4. Використання лямбда-виразу / Func для обчислення суми замовлення
+Func<Order, decimal> calculateOrderTotal = order => order.CalculateTotal();
 
-// 3. Групування та агрегування (GroupBy)
-shop.DisplayCategorySummary();
+Customer customer = new Customer { Name = "Олександр Шевченко" };
+Order order = new Order(customer);
+order.AddItem(phone);
+order.AddItem(coffee);
+
+decimal totalSum = calculateOrderTotal(order);
+Console.WriteLine($"\nЗагальна сума замовлення (через Func): {totalSum:F2} грн.");

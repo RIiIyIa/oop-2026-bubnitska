@@ -52,20 +52,37 @@ public abstract class Product
 
     public int Quantity => _quantity;
 
+    // Подія зміни залишку товару
+    public event EventHandler<StockChangedEventArgs>? StockChanged;
+
+    public void UpdateQuantity(int newQuantity)
+    {
+        if (newQuantity < 0)
+        {
+            Console.WriteLine("Помилка: Кількість не може бути від'ємною!");
+            return;
+        }
+
+        int previous = _quantity;
+        _quantity = newQuantity;
+
+        StockChanged?.Invoke(this, new StockChangedEventArgs(previous, newQuantity));
+    }
+
     public void AddProduct(int amount)
     {
-        if (amount > 0) _quantity += amount;
+        if (amount > 0) UpdateQuantity(_quantity + amount);
     }
 
     public void RemoveProduct(int amount)
     {
-        if (amount > 0 && amount <= _quantity) _quantity -= amount;
+        if (amount > 0 && amount <= _quantity) UpdateQuantity(_quantity - amount);
     }
 
     public abstract decimal CalculatePrice();
 
     public virtual void DisplayInfo()
     {
-        Console.WriteLine($"[ID: {Id}] Товар: {_name}, Категорія: {_category}, Базова ціна: {_basePrice} грн., Кількість: {_quantity} шт.");
+        Console.WriteLine($"[ID: {Id}] Товар: {_name}, Категорія: {_category}, Ціна: {_basePrice} грн., Залишок: {_quantity} шт.");
     }
 }
