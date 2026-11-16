@@ -1,50 +1,24 @@
 using ShopApp.Models;
 
-// 1. Створення товарів
-ElectronicsProduct phone = new ElectronicsProduct
-{
-    Id = 1,
-    Name = "Смартфон",
-    Category = "Електроніка",
-    BasePrice = 19999.99m,
-    WarrantyMonths = 12
-};
+// 1. Створення об'єкта record Snapshot
+ProductSnapshot phone = new ProductSnapshot(
+    Id: 1,
+    Name: "Смартфон",
+    BasePrice: 19999.99m,
+    Category: "Електроніка",
+    Description: "Флагманський смартфон із потужним процесором"
+);
 
-FoodProduct coffee = new FoodProduct
-{
-    Id = 2,
-    Name = "Кава зернова",
-    Category = "Продукти",
-    BasePrice = 350.00m,
-    ExpirationDate = new DateTime(2027, 10, 15)
-};
+PriceValue priceStruct = new PriceValue(19999.99m);
 
-// 2. Налаштування підписки на подію StockChanged
-ShopNotifier notifier = new ShopNotifier();
-ShopNotifier.Subscribe(phone, notifier);
+Console.WriteLine($"Товар: {phone.Name} | Ціна (struct): {priceStruct.Value} грн.");
+Console.WriteLine($"Цінова категорія: {ProductDataProcessor.GetPriceCategory(phone)}");
+Console.WriteLine($"Опис: {ProductDataProcessor.GetDescriptionText(phone)}");
 
-phone.UpdateQuantity(10); // Звичайне поповнення
+// 2. Демонстрація роботи з діапазонами для SKU
+string sampleSku = "ELK-98765";
+Console.WriteLine($"Префікс SKU ({sampleSku}): {ProductDataProcessor.GetSkuPrefix(sampleSku)}");
 
-// Викличе попередження про низький залишок (< 3)
-phone.UpdateQuantity(2); 
-
-// 3. Використання Predicate<Product> для фільтрації товарів
-Console.WriteLine("\n--- Добір товарів за допомогою Predicate<T> ---");
-Predicate<Product> affordableProducts = p => p.BasePrice < 1000m;
-var cheapItems = ShopNotifier.FilterProducts(new List<Product> { phone, coffee }, affordableProducts);
-
-foreach (var item in cheapItems)
-{
-    item.DisplayInfo();
-}
-
-// 4. Використання лямбда-виразу / Func для обчислення суми замовлення
-Func<Order, decimal> calculateOrderTotal = order => order.CalculateTotal();
-
-Customer customer = new Customer { Name = "Олександр Шевченко" };
-Order order = new Order(customer);
-order.AddItem(phone);
-order.AddItem(coffee);
-
-decimal totalSum = calculateOrderTotal(order);
-Console.WriteLine($"\nЗагальна сума замовлення (через Func): {totalSum:F2} грн.");
+// 3. Демонстрація незмінності та виразу with (створення копії зі зміненою ціною)
+var discountedPhone = ProductDataProcessor.WithNewPrice(phone, 17999.99m);
+Console.WriteLine($"Знижка! Нова ціна смартфона: {discountedPhone.BasePrice} грн.");
